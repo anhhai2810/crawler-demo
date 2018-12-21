@@ -70,18 +70,21 @@ const html2Video = ($) => {
   // const star = reviews.find('>span i:not(.none)').length
   // var now = moment("2/10/2018", "DD/MM/YYYY").format();
   // console.log('toISOString',now, new Date('2018-10-02').toISOString())
-  console.log('Ngày ra rạp:', $('.movie-dl .movie-dd').eq(6).text())
-  process.exit()
+  // console.log('Ngày ra rạp:', $('.movie-dl .movie-dd').eq(6).text())
+  // process.exit()
 
   const name = $('.movie-info .movie-title a.title-1').text()
   const lead = $('meta[property="og:description"]').attr('content')
   const content = $('#film-content').html()
   const links = ''
-  const images = $('.movie-image > img').attr('src')
+  const images = $('.movie-image .movie-l-img > img').attr('src')
   const status = 1
   const publishAt = moment().format()
-  const IMDb = 0;
-  const dao_dien = ''
+  const IMDb = $('.movie-dd.imdb').text()
+  const dao_dien = getElementsCommon($, '.movie-dd.dd-director a')
+  const quoc_gia = getElementsCommon($, '.movie-dd.dd-country a')
+  const the_loai = getElementsCommon($, '.movie-dd.dd-cat a')
+  const dien_vien = getActors($, '#list_actor_carousel li')
   const ngay_phat_hanh = moment($('.movie-dl .movie-dd').eq(6).text(), "DD/MM/YYYY").format()
   const ngay_ra_rap = moment($('.movie-dl .movie-dd').eq(6).text(), "DD/MM/YYYY").format()
   const thoi_luong = $('.movie-dl .movie-dd').eq(7).text().replace(' phút','')
@@ -89,10 +92,10 @@ const html2Video = ($) => {
   const do_phan_giai = $('.movie-dl .movie-dd').eq(9).text()
   const ngon_ngu = $('.movie-dl .movie-dd').eq(10).text()
   const cty_sx = $('.movie-dl .movie-dd').eq(12).text()
-  const total_view = $('.movie-dl .movie-dd').eq(13).text().replace(',','')
-  const rating = $('#star').attr('data-score');
+  const total_view = $('.movie-dl .movie-dd').eq(13).text().replace(/\,/g,'')
+  const rating = $('#star').attr('data-score')
   const trailer_link = ''
-  const tags = ''
+  const tags = getElementsCommon($, '.tag-list li a')
   const total_comment = 0
   const name2 = $('.movie-info .movie-title span.title-2').text()
   const hang_sx = $('.movie-dl .movie-dd').eq(12).text()
@@ -101,12 +104,74 @@ const html2Video = ($) => {
 
   return {
     name,
+    lead,
+    content,
+    links,
+    images,
+    status,
+    publishAt,
+    IMDb,
+    dao_dien,
+    quoc_gia,
+    the_loai,
+    dien_vien,
+    ngay_phat_hanh,
+    ngay_ra_rap,
+    thoi_luong,
+    chat_luong,
+    do_phan_giai,
+    ngon_ngu,
+    cty_sx,
+    total_view,
+    rating,
+    trailer_link,
+    tags,
+    total_comment,
     name2,
-    share_url,
-    code
+    hang_sx,
+    video_id_crawler,
+    detail_link_crawler,
   }
 }
 
+const getElementsCommon = ($, el) => {
+  var x =[];
+  $(el).each(function(index, obj)
+  {
+    var obj = {};
+    obj.name = $(this).text(); 
+    obj.share_url = $(this).attr('href');
+    x.push(obj);
+  });
+  return x;
+}
+
+const getActors = ($, el) => {
+  var x =[];
+  $(el).each(function(index, obj)
+  {
+    var obj = {};
+    obj.name = $(this).find('.actor-name-a').text(); 
+    obj.character = $(this).find('.character').text(); 
+    obj.share_url = $(this).find('.actor-profile-item').attr('href');
+    obj.image = $(this).find('.actor-image').attr('style').replace('background-image:url(\'','').replace('\')','');
+    x.push(obj);
+  });
+  return x;
+}
+
+const getLinksVideo = (uri) => {
+  let isError = false
+  return getPageContent(uri)
+    .then(({ uri, $ }) => {
+      var link = [];
+      
+    }).catch(error => {
+      isError = true
+    }).then((videos) => {
+      return isError ? uri : videos
+    })
+}
 
 const createvideos = (videos) => {
   return Promise.all(videos.map(c => Video.findOneAndUpdate({ name: c.name }, { $set: c }, { upsert: true })))
@@ -128,10 +193,11 @@ const crawl = async(pages, results) => {
   const chunks = await Promise.all(pages.map(uri => crawlPage(uri)))
   const availableChunks = _.filter(chunks, c => typeof c === 'object')
   const remainPages = _.filter(chunks, c => typeof c === 'string')
-  console.log("testtttttttttttt", chunks, availableChunks, remainPages)
+  console.log("testtttttttttttt", availableChunks)
+  process.exit()
   if (availableChunks.length > 0) {
-    results = await Promise.all(availableChunks.map(videos => createvideos(videos)))
-      .then((data) => data.reduce((page1, page2) => page1.concat(page2)))
+    // results = await Promise.all(availableChunks.map(videos => createvideos(videos)))
+    //   .then((data) => data.reduce((page1, page2) => page1.concat(page2)))
     // results = {};
   }
   if (remainPages && remainPages.length > 0) {
