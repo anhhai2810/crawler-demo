@@ -21,19 +21,22 @@ const getPageContent = (uri) => {
     uri,
     headers: {
       'User-Agent': 'Request-Promise'
+      // 'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.103 Safari/537.36'
     },
     transform: (body) => {
       return cheerio.load(body)
     }
   }
-
   return request(options)
     .then(($) => {
       return {
         $,
         uri,
       }
-    })
+    }).catch(function (err) {
+        // Crawling failed or Cheerio choked...
+        console.log('errerrerrerrerrerrerrerrerrerrerr', err)
+    });
 }
 
 /**
@@ -76,7 +79,7 @@ const html2Video = ($) => {
   const name = $('.movie-info .movie-title a.title-1').text()
   const lead = $('meta[property="og:description"]').attr('content')
   const content = $('#film-content').html()
-  const links = ''
+  const links = []
   const images = $('.movie-image .movie-l-img > img').attr('src')
   const status = 1
   const publishAt = moment().format()
@@ -101,6 +104,22 @@ const html2Video = ($) => {
   const hang_sx = $('.movie-dl .movie-dd').eq(12).text()
   const video_id_crawler = $('.tools-box-bookmark.normal').attr('data-filmid')
   const detail_link_crawler = $('.movie-info h1.movie-title a').attr('href')
+
+  const api = 'http://episode.phimmoi.net/episodeinfo-v1.2.php';
+      api += '?ip=';
+      api += '&filmid=7801';
+      api += '&episodeid=172700';
+      api += '&number=5';
+      api += '&part=0';
+      api += '&filmslug=phim-slug';
+      api += '&type=json';
+      api += '&requestid=';
+      api += '&token=0fb706e46fe15459919329f51de800fd';
+      api += '&cs=&sig=&decryptkey=&_fxToken=';
+  
+  const link_xem_phim = 'http://www.phimmoi.net/' + detail_link_crawler + 'xem-phim.html';
+
+  links = getLinksVideo(api)
 
   return {
     name,
@@ -164,8 +183,9 @@ const getLinksVideo = (uri) => {
   let isError = false
   return getPageContent(uri)
     .then(({ uri, $ }) => {
-      var link = [];
-      
+      console.log(JSON.parse($('body').text()), 'linkkkkkkkkkkkkkkkkkkkkkkkkkk',uri)
+      // var link = [];
+      return uri
     }).catch(error => {
       isError = true
     }).then((videos) => {
