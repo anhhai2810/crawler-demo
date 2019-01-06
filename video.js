@@ -105,7 +105,7 @@ const html2Video = ($) => {
   const video_id_crawler = $('.tools-box-bookmark.normal').attr('data-filmid')
   const detail_link_crawler = $('.movie-info h1.movie-title a').attr('href')
 
-  const api = 'http://episode.phimmoi.net/episodeinfo-v1.2.php';
+  var api = 'http://episode.phimmoi.net/episodeinfo-v1.2.php';
       api += '?ip=';
       api += '&filmid=7801';
       api += '&episodeid=172700';
@@ -118,9 +118,9 @@ const html2Video = ($) => {
       api += '&cs=&sig=&decryptkey=&_fxToken=';
   
   const link_xem_phim = 'http://www.phimmoi.net/' + detail_link_crawler + 'xem-phim.html';
-
-  links = getLinksVideo(api)
-
+console.log('link_xem_phim',link_xem_phim)
+  links = getLinksVideo(link_xem_phim)
+console.log('result LInkssss', links)
   return {
     name,
     lead,
@@ -179,18 +179,10 @@ const getActors = ($, el) => {
   return x;
 }
 
-const getLinksVideo = (uri) => {
-  let isError = false
-  return getPageContent(uri)
-    .then(({ uri, $ }) => {
-      console.log(JSON.parse($('body').text()), 'linkkkkkkkkkkkkkkkkkkkkkkkkkk',uri)
-      // var link = [];
-      return uri
-    }).catch(error => {
-      isError = true
-    }).then((videos) => {
-      return isError ? uri : videos
-    })
+const getLinksVideo = (uri) => {console.log('voooooooooo', uri)
+  crawlPage(uri)
+  
+  process.exit()
 }
 
 const createvideos = (videos) => {
@@ -227,28 +219,30 @@ const crawl = async(pages, results) => {
   return results
 }
 
-mongoose.Promise = global.Promise
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/crawl', {
-  useMongoClient: true
-}, (error) => {
-  if (error) {
-    console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'))
-    process.exit()
-  }
+var testt = crawlPage('http://www.phimmoi.net/phim/quai-vat-venom-7022/xem-phim.html');
 
-  console.time('crawl > ')
-  const pages = [`${URL}`]
-  // for (let i = 1; i <= pageCount; i++) {
-  //   pages.push(`${URL}page/${i}`)
-  // }
-  const results = []
-  crawl(pages, results).then((videos) => {
-    if (!videos)
-      return
-    console.log(`Created ${videos.length} videos`)
-    return
-  }).then(() => {
-    console.timeEnd('crawl > ')
-    process.exit()
-  })
-})
+// mongoose.Promise = global.Promise
+// mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/crawl', {
+//   useMongoClient: true
+// }, (error) => {
+//   if (error) {
+//     console.log('%s MongoDB connection error. Please make sure MongoDB is running.', chalk.red('✗'))
+//     process.exit()
+//   }
+
+//   console.time('crawl > ')
+//   const pages = [`${URL}`]
+//   // for (let i = 1; i <= pageCount; i++) {
+//   //   pages.push(`${URL}page/${i}`)
+//   // }
+//   const results = []
+//   crawl(pages, results).then((videos) => {
+//     if (!videos)
+//       return
+//     console.log(`Created ${videos.length} videos`)
+//     return
+//   }).then(() => {
+//     console.timeEnd('crawl > ')
+//     process.exit()
+//   })
+// })
