@@ -4,7 +4,7 @@ const cheerio = require('cheerio')
 const _ = require('lodash')
 const moment = require('moment')
 
-const Video = require('./models/Video')
+const Video = require('./models/video')
 
 const URL = 'http://www.phimmoi.net/phim/quai-vat-venom-7022/'
 const companyCount = 20 // Cái này là mình thấy trên trang này nó ghi vậy. =))
